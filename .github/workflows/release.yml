@@ -32,6 +32,7 @@ jobs:
           cp .dockerignore "$dst/.dockerignore"
           cp database/schema.sql "$dst/database/"
           cp infra/docker/Dockerfile.release "$dst/infra/docker/"
+            cp infra/docker/check-database.sh "$dst/infra/docker/"
           cp infra/caddy/Caddyfile "$dst/infra/caddy/"
           cp scripts/servidor.* "$dst/scripts/"
           cp docs/operacion/instalacion.md "$dst/docs/"

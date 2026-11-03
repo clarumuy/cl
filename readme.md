@@ -29,6 +29,8 @@ compose.yaml  los tres contenedores del servidor
 
 ## durante el uso
 
+Si aparece `Access denied for user 'control'`, repetimos el arranque con estos scripts: comprueban la conexión y sincronizan la contraseña de `control` usando `DB_ROOT_PASSWORD`, sin borrar datos. MariaDB conserva las claves del volumen aunque cambiemos `.env`. Si también rechaza la clave de root, restauramos `DB_PASSWORD` y `DB_ROOT_PASSWORD` del `.env` original de esa instalación. No ejecutamos `docker compose down -v`, porque eliminaría la base.
+
 El agente arranca con el sistema operativo. Cada cinco segundos se conecta por HTTPS a nuestro servidor para informar que sigue disponible y consultar si tiene una orden. El servidor guarda todo en MariaDB. Una orden de apagado tiene ID y hora límite; el agente confirma su recepción antes de intentar ejecutarla. El estado **Sin respuesta** no demuestra por sí solo que la computadora esté apagada.
 
 Para apagar una sala, todas las órdenes llevan un mismo momento de inicio. Esto busca coordinar los equipos, aunque cada computadora puede demorar distinto en terminar de apagarse. La demostración real requiere equipos autorizados y pruebas en la red del instituto.

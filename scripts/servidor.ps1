@@ -81,7 +81,9 @@ try {
     }
     Move-Item -Force -LiteralPath $temporary -Destination $path
     Write-Host "Dirección del servidor: https://$ServerAddress"
-    Invoke-Docker -Arguments @('compose', 'up', '--build', '-d', '--remove-orphans')
+    Invoke-Docker -Arguments @('compose', 'up', '-d', '--wait', 'db')
+    Invoke-Docker -Arguments @('compose', 'exec', '-T', 'db', 'sh', '/opt/control/check-database.sh')
+    Invoke-Docker -Arguments @('compose', 'up', '--build', '-d', '--remove-orphans', '--force-recreate', 'web', 'caddy')
     function Test-ServerReady {
         $ErrorActionPreference = 'Continue'
         $status = & docker compose exec -T caddy wget -q -T 2 -O - http://web:8080/health 2>$null

@@ -10,6 +10,7 @@ services:
       MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Falta DB_ROOT_PASSWORD}
     volumes:
       - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./infra/docker/check-database.sh:/opt/control/check-database.sh:ro
       - db_data:/var/lib/mysql
     restart: unless-stopped
     healthcheck:

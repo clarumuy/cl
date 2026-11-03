@@ -21,7 +21,7 @@ jobs:
       - name: Verificar scripts
         shell: bash
         run: |
-          bash -n scripts/servidor.sh tests/*.sh agent/packaging/linux/*.sh agent/packaging/macos/*.sh
+          bash -n scripts/servidor.sh infra/docker/check-database.sh tests/*.sh agent/packaging/linux/*.sh agent/packaging/macos/*.sh
           bash tests/agent-smoke.sh
           bash tests/repository-check.sh
       - name: Validar PowerShell
@@ -49,5 +49,13 @@ jobs:
             "ADMIN_PASSWORD=$ADMIN_PASSWORD" "SERVER_HOST=$SERVER_HOST" > .env
           trap 'docker compose down -v --remove-orphans; rm -f .env' EXIT
           docker compose config --quiet
+          docker compose up -d --wait db
+          docker compose exec -T db sh /opt/control/check-database.sh
+          # Simular una contraseña persistida distinta y verificar su reparación.
+          docker compose exec -T db sh -c 'MYSQL_PWD="$MARIADB_ROOT_PASSWORD" mariadb -u root' <<'SQL'
+          SET PASSWORD FOR 'control'@'%' = PASSWORD('clave-anterior-de-prueba');
+          SQL
+          docker compose exec -T db sh /opt/control/check-database.sh
+          docker compose exec -T db sh /opt/control/check-database.sh
           docker compose up --build -d --wait
           bash tests/integration.sh

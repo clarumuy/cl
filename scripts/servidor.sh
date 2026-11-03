@@ -55,7 +55,9 @@ printf '\nSERVER_HOST=%s\n' "$host" >> "$temporary"
 chmod 600 "$temporary"
 mv -f "$temporary" .env
 printf 'Dirección del servidor: https://%s\n' "$host"
-docker compose up --build -d --remove-orphans
+docker compose up -d --wait db
+docker compose exec -T db sh /opt/control/check-database.sh
+docker compose up --build -d --remove-orphans --force-recreate web caddy
 ready=false
 for attempt in {1..60}; do
     if docker compose exec -T caddy wget -q -T 2 -O - http://web:8080/health 2> /dev/null | grep -qx ok; then

@@ -1,0 +1,53 @@
+name: Pruebas del proyecto
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  java:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - name: Compilar y probar ambos módulos
+        run: mvn -B -ntp clean verify
+      - name: Verificar scripts
+        shell: bash
+        run: |
+          bash -n scripts/servidor.sh tests/*.sh agent/packaging/linux/*.sh agent/packaging/macos/*.sh
+          bash tests/agent-smoke.sh
+          bash tests/repository-check.sh
+      - name: Validar PowerShell
+        shell: pwsh
+        run: |
+          foreach ($file in @('scripts/servidor.ps1','agent/packaging/windows/instalar.ps1','agent/packaging/windows/desinstalar.ps1')) {
+            $tokens=$null; $errors=$null
+            [System.Management.Automation.Language.Parser]::ParseFile("$PWD/$file",[ref]$tokens,[ref]$errors) | Out-Null
+            if ($errors.Count) { throw ($errors | Out-String) }
+          }
+  integration:
+    needs: java
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Iniciar entorno de prueba y verificar HTTP, JDBC y órdenes
+        shell: bash
+        run: |
+          set -euo pipefail
+          export DB_PASSWORD="$(openssl rand -hex 24)"
+          export DB_ROOT_PASSWORD="$(openssl rand -hex 24)"
+          export ADMIN_PASSWORD="$(openssl rand -hex 16)"
+          export SERVER_HOST=127.0.0.1
+          printf '%s\n' "DB_PASSWORD=$DB_PASSWORD" "DB_ROOT_PASSWORD=$DB_ROOT_PASSWORD" \
+            "ADMIN_PASSWORD=$ADMIN_PASSWORD" "SERVER_HOST=$SERVER_HOST" > .env
+          trap 'docker compose down -v --remove-orphans; rm -f .env' EXIT
+          docker compose config --quiet
+          docker compose up --build -d --wait
+          bash tests/integration.sh

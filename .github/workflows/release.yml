@@ -1,0 +1,140 @@
+name: Publicar versión
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: read
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: false
+jobs:
+  server:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - name: Pruebas y WAR
+        run: mvn -B -ntp -pl server -am clean verify
+      - name: Empaquetar despliegue de Docker
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist/server/control-laboratorios-server/{database,infra/docker,infra/caddy,scripts,docs}
+          dst=dist/server/control-laboratorios-server
+          cp server/target/ROOT.war "$dst/ROOT.war"
+          cp server/target/ROOT.war dist/server/control-laboratorios-server.war
+          cp compose.yaml "$dst/compose.yaml"
+          sed -i 's@infra/docker/Dockerfile$@infra/docker/Dockerfile.release@' "$dst/compose.yaml"
+          cp .dockerignore "$dst/.dockerignore"
+          cp database/schema.sql "$dst/database/"
+          cp infra/docker/Dockerfile.release "$dst/infra/docker/"
+          cp infra/caddy/Caddyfile "$dst/infra/caddy/"
+          cp scripts/servidor.* "$dst/scripts/"
+          cp docs/operacion/instalacion.md "$dst/docs/"
+          cp readme.md "$dst/readme.md"
+          (cd dist/server && zip -q -r control-laboratorios-server.zip control-laboratorios-server)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: server-release
+          path: |
+            dist/server/*.zip
+            dist/server/*.war
+          if-no-files-found: error
+  agent:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { platform: windows-x64, runner: windows-2025, os: windows, archive: zip }
+          - { platform: linux-x64, runner: ubuntu-24.04, os: linux, archive: tar.gz }
+          - { platform: macos-x64, runner: macos-15-intel, os: macos, archive: tar.gz }
+          - { platform: macos-arm64, runner: macos-15, os: macos, archive: tar.gz }
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: graalvm/setup-graalvm@v1
+        with:
+          distribution: graalvm-community
+          java-version: '25'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          native-image-job-reports: 'true'
+      - name: Compilar en Windows
+        if: matrix.os == 'windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          mvn -B -ntp -pl agent -am clean package
+          if($LASTEXITCODE -ne 0){throw 'Falló Maven'}
+          native-image --no-fallback -jar agent/target/control-agent.jar ControlAgent
+          if($LASTEXITCODE -ne 0){throw 'Falló Native Image'}
+          $env:CONTROL_AGENT_CONFIG = Join-Path $PWD 'agent\target\test-agent.properties'
+          .\ControlAgent.exe --configure https://lab.example tests/fixtures/test-ca.crt
+          if($LASTEXITCODE -ne 0 -or -not (Test-Path $env:CONTROL_AGENT_CONFIG)){throw 'Falló prueba nativa'}
+          New-Item -ItemType Directory -Force dist,package | Out-Null
+          Copy-Item ControlAgent.exe package/ControlAgent.exe
+          Copy-Item agent/packaging/windows/*.ps1 package/
+          Compress-Archive -Path package/* -DestinationPath dist/control-agent-windows-x64.zip
+      - name: Compilar en Linux y macOS
+        if: matrix.os != 'windows'
+        shell: bash
+        env:
+          PLATFORM: ${{ matrix.platform }}
+          OS: ${{ matrix.os }}
+        run: |
+          set -euo pipefail
+          mvn -B -ntp -pl agent -am clean package
+          native-image --no-fallback -jar agent/target/control-agent.jar ControlAgent
+          export CONTROL_AGENT_CONFIG="$PWD/agent/target/test-agent.properties"
+          ./ControlAgent --configure https://lab.example tests/fixtures/test-ca.crt
+          test -f "$CONTROL_AGENT_CONFIG"
+          mkdir -p package dist
+          cp ControlAgent package/ControlAgent
+          cp agent/packaging/$OS/*.sh package/
+          chmod 755 package/ControlAgent package/*.sh
+          (cd package && tar -czf "../dist/control-agent-$PLATFORM.tar.gz" .)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: agent-${{ matrix.platform }}
+          path: dist/control-agent-*
+          if-no-files-found: error
+  release:
+    needs: [server, agent]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: '*-release'
+          path: release
+          merge-multiple: true
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: 'agent-*'
+          path: release
+          merge-multiple: true
+      - name: Comprobar los paquetes y crear hashes
+        shell: bash
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.-]+)?$ ]] || exit 1
+          for f in control-laboratorios-server.zip control-laboratorios-server.war \
+            control-agent-windows-x64.zip control-agent-linux-x64.tar.gz \
+            control-agent-macos-x64.tar.gz control-agent-macos-arm64.tar.gz; do
+            test -s "release/$f" || { echo "Falta $f" >&2; exit 1; }
+          done
+          (cd release && sha256sum -- *.zip *.war *.tar.gz > SHA256SUMS && sha256sum -c SHA256SUMS)
+      - name: Publicar GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+        shell: bash
+        run: |
+          gh release create "$TAG" release/* --verify-tag --title "Control de Laboratorios $TAG" --generate-notes --latest

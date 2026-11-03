@@ -1,0 +1,11 @@
+.git
+.github
+.env
+.env.*
+secrets
+certs
+docs
+tests
+**/target
+**/*.class
+**/__pycache__

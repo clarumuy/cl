@@ -1,0 +1,13 @@
+# Credenciales y certificados propios de cada instalación
+.env
+.env.*
+secrets/
+certs/
+# Compilación
+**/target/
+**/*.class
+agent/dist/
+dist/
+*.log
+.idea/
+.vscode/

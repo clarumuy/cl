@@ -1,0 +1,10 @@
+{
+    auto_https disable_redirects
+    default_sni {$SERVER_HOST:localhost}
+}
+
+{$SERVER_HOST:localhost} {
+    tls internal
+    encode gzip
+    reverse_proxy web:8080
+}

@@ -1,0 +1,23 @@
+<%@ page pageEncoding="UTF-8" %>
+<div class="stats" aria-label="Resumen del sistema">
+    <a href="${pageContext.request.contextPath}/app?page=labs" class="stat">
+        <span>LABORATORIOS</span>
+        <strong><%= labs.size() %></strong>
+        <small>Salas registradas</small>
+    </a>
+    <a href="${pageContext.request.contextPath}/app?page=pcs" class="stat">
+        <span>COMPUTADORAS</span>
+        <strong><%= computers.size() %></strong>
+        <small>Equipos registrados</small>
+    </a>
+    <a href="${pageContext.request.contextPath}/app?page=pcs" class="stat">
+        <span>EN LÍNEA</span>
+        <strong><%= onlineCount %></strong>
+        <small>Último contacto reciente</small>
+    </a>
+    <a href="${pageContext.request.contextPath}/app?page=pending" class="stat <%= pending.isEmpty() ? "" : "attention" %>">
+        <span>POR VINCULAR</span>
+        <strong><%= pending.size() %></strong>
+        <small>Esperando aprobación</small>
+    </a>
+</div>

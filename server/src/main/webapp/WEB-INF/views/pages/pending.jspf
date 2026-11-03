@@ -1,0 +1,104 @@
+<%@ page pageEncoding="UTF-8" %>
+<section id="pending" class="panel">
+    <div class="section-title">
+        <h2>
+            Equipos por vincular
+            <span><%= pending.size() %></span>
+        </h2>
+    </div>
+    <p>
+        Instalá el agente en la computadora. Cuando se conecte, aparecerá acá sin cargar su
+        dirección IP.
+    </p>
+    <% AgentInstallation installation = (AgentInstallation) request.getAttribute("installation"); %>
+    <section class="installation-guide" aria-labelledby="installation-title">
+        <h2 id="installation-title">Instalar en una computadora</h2>
+        <% if (!installation.error().isEmpty()) { %>
+        <p class="alert"><%= Html.escape(installation.error()) %></p>
+        <% } else { %>
+        <p>
+            Descargá de GitHub Releases el paquete nativo de tu sistema operativo, verificá su
+            SHA-256 y extraelo en la computadora autorizada. Antes de instalar, copiá
+            <code>secrets/ca.crt</code> desde el servidor a la carpeta extraída, por USB o una red confiable. Ejecutá el comando indicado abajo
+            <strong>desde la carpeta extraída y con permisos de administrador</strong>. El paquete
+            incluye el agente: no requiere Java ni descarga programas al instalarse.
+            Al vincular un equipo, los administradores podrán solicitar su apagado.
+        </p>
+        <p>
+            La dirección del servidor y su certificado público quedan guardados localmente.
+            La identidad del equipo se conserva al actualizar. Las computadoras necesitan acceso al servidor por la red local.
+            En Windows usá PowerShell como administrador.
+        </p>
+        <label>
+            Windows · PowerShell
+            <textarea
+                id="install-windows"
+                rows="2"
+                readonly
+                aria-label="Comando de instalación para Windows"
+            >
+<%= Html.escape(installation.windows()) %></textarea
+            >
+        </label>
+        <button type="button" class="secondary" data-command="copy" data-target="install-windows">
+            Copiar Windows
+        </button>
+        <label>
+            Linux y macOS · Bash
+            <textarea
+                id="install-unix"
+                rows="2"
+                readonly
+                aria-label="Comando de instalación para Linux y macOS"
+            >
+<%= Html.escape(installation.unix()) %></textarea
+            >
+        </label>
+        <button type="button" class="secondary" data-command="copy" data-target="install-unix">
+            Copiar Linux / macOS
+        </button>
+        <p>
+            Al terminar, el agente queda instalado como tarea de inicio del equipo (Windows),
+            servicio systemd (Linux) o LaunchDaemon (macOS), sin exigir inicio de sesión.
+        </p>
+        <p>
+            GitHub se utiliza para distribuir los paquetes. La instalación y el uso no requieren
+            Internet después de descargarlos; sí acceso TCP 443 al servidor desde cada equipo.
+        </p>
+        <p>
+            Para actualizar, descargá un paquete nuevo y repetí el comando desde su carpeta.
+            El instalador conserva la identidad y reemplaza el ejecutable.
+        </p>
+        <% } %>
+    </section>
+    <% if (pending.isEmpty()) { %>
+    <p class="empty-state">
+        No hay equipos pendientes. Consultá la guía de instalación del agente.
+    </p>
+    <% } %>
+    <% for (var device : pending) { %>
+    <form method="post" class="editor">
+        <input type="hidden" name="page" value="<%= activePage %>" />
+        <input type="hidden" name="csrf" value="<%= csrf %>" />
+        <input type="hidden" name="agentId" value="<%= Html.escape(device.id()) %>" />
+        <div class="device-name">
+            <strong><%= Html.escape(device.name()) %></strong>
+            <small>ID: <%= Html.escape(device.id()) %></small>
+            <small>Detectada: <%= Html.escape(device.lastSeen()) %></small>
+        </div>
+        <label>
+            Laboratorio
+            <select name="laboratoryId" required>
+                <option value="">Elegir laboratorio</option>
+                <% for (Laboratory lab : labs) { %>
+                <option value="<%= lab.id() %>"><%= Html.escape(lab.name()) %></option>
+                <% } %>
+            </select>
+        </label>
+        <button name="action" value="approve-agent">Vincular</button>
+        <button class="secondary" name="action" value="reject-agent" formnovalidate>
+            Descartar
+        </button>
+    </form>
+    <% } %>
+</section>

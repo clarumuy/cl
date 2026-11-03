@@ -1,0 +1,110 @@
+<%@ page pageEncoding="UTF-8" %>
+<section id="labs" class="panel">
+    <div class="section-title">
+        <h2>
+            Laboratorios
+            <span><%= labs.size() %></span>
+        </h2>
+        <button
+            type="button"
+            aria-haspopup="dialog"
+            aria-controls="labs-editor"
+            data-command="create"
+            data-section="labs"
+            data-title="Agregar laboratorio"
+            data-field="lab-name"
+        >
+            Agregar laboratorio
+        </button>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Sala</th>
+                    <th>Equipos</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (labs.isEmpty()) { %>
+                <tr>
+                    <td colspan="4" class="table-empty">
+                        Todavía no hay laboratorios. Agregá el primero para organizar los equipos.
+                    </td>
+                </tr>
+                <% } %>
+                <% for (Laboratory lab : labs) { %>
+                <tr>
+                    <td><strong><%= Html.escape(lab.name()) %></strong></td>
+                    <td><%= Html.escape(lab.room()) %></td>
+                    <td><%= computerCounts.getOrDefault(lab.id(), 0L) %></td>
+                    <td>
+                        <div class="actions">
+                            <button
+                                type="button"
+                                class="text-button"
+                                data-command="edit-lab"
+                                data-id="<%= lab.id() %>"
+                                data-name="<%= Html.escape(lab.name()) %>"
+                                data-room="<%= Html.escape(lab.room()) %>"
+                            >
+                                Editar
+                            </button>
+                            <form method="post" data-confirm="¿Eliminar este laboratorio?">
+                                <input type="hidden" name="page" value="<%= activePage %>" />
+                                <input type="hidden" name="csrf" value="<%= csrf %>" />
+                                <input type="hidden" name="action" value="delete-lab" />
+                                <input type="hidden" name="id" value="<%= lab.id() %>" />
+                                <button class="danger text-button">Eliminar</button>
+                            </form>
+                            <form
+                                method="post"
+                                data-confirm="¿Enviar una orden de apagado a todos los equipos de este laboratorio?"
+                            >
+                                <input type="hidden" name="page" value="<%= activePage %>" />
+                                <input type="hidden" name="csrf" value="<%= csrf %>" />
+                                <input type="hidden" name="action" value="shutdown-lab" />
+                                <input type="hidden" name="id" value="<%= lab.id() %>" />
+                                <button class="danger text-button">Apagar todos</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+
+    <dialog id="labs-editor" class="record-modal" aria-labelledby="labs-editor-title">
+        <header class="modal-header">
+            <h2 id="labs-editor-title">Agregar laboratorio</h2>
+            <button type="button" class="secondary" data-command="close">Cerrar</button>
+        </header>
+        <form method="post" class="editor">
+            <input type="hidden" name="page" value="<%= activePage %>" />
+            <input type="hidden" name="csrf" value="<%= csrf %>" />
+            <input type="hidden" name="action" value="save-lab" />
+            <input type="hidden" name="id" id="lab-id" value="0" />
+            <label>
+                Nombre
+                <input
+                    id="lab-name"
+                    name="name"
+                    maxlength="100"
+                    required
+                    placeholder="Laboratorio 1"
+                />
+            </label>
+            <label>
+                Sala
+                <input id="lab-room" name="room" maxlength="80" required placeholder="Aula 402" />
+            </label>
+            <div class="modal-actions">
+                <button type="button" class="secondary" data-command="close">Cancelar</button>
+                <button type="submit">Guardar laboratorio</button>
+            </div>
+        </form>
+    </dialog>
+</section>

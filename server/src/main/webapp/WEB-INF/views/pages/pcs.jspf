@@ -1,0 +1,133 @@
+<%@ page pageEncoding="UTF-8" %>
+<section id="pcs" class="panel">
+    <div class="section-title">
+        <h2>
+            Computadoras
+            <span><%= computers.size() %></span>
+        </h2>
+        <button
+            type="button"
+            aria-haspopup="dialog"
+            aria-controls="pcs-editor"
+            data-command="create"
+            data-section="pcs"
+            data-title="Agregar computadora"
+            data-field="pc-name"
+        >
+            Agregar computadora
+        </button>
+    </div>
+    <p>
+        Disponible indica contacto reciente con el agente. Sin respuesta no significa que esté
+        apagada.
+    </p>
+    <div class="table-toolbar">
+        <label class="search-label">
+            Buscar equipo
+            <input
+                id="computer-search"
+                type="search"
+                placeholder="Nombre, laboratorio o dirección"
+                autocomplete="off"
+            />
+        </label>
+        <p id="search-count" role="status" aria-live="polite"></p>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Equipo</th>
+                    <th>Conexión</th>
+                    <th>Laboratorio</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (computers.isEmpty()) { %>
+                <tr>
+                    <td colspan="5" class="table-empty">
+                        Todavía no hay computadoras registradas. Vinculá un equipo o agregalo
+                        manualmente.
+                    </td>
+                </tr>
+                <% } %>
+                <% for (Computer pc : computers) { %>
+                <tr>
+                    <td><strong><%= Html.escape(pc.name()) %></strong></td>
+                    <td><code><%= pc.ip().startsWith("agent:") ? "Automática" : Html.escape(pc.ip()) %></code></td>
+                    <td><%= Html.escape(laboratoryNames.getOrDefault(pc.laboratoryId(), "—")) %></td>
+                    <td><span class="status <%= Boolean.TRUE.equals(states.get(pc.id())) ? "online" : "offline" %>"><%= !pc.ip().startsWith("agent:") ? "Sin agente" : (Boolean.TRUE.equals(states.get(pc.id())) ? "Disponible" : "Sin respuesta") %></span></td>
+                    <td>
+                        <div class="actions">
+                            <button
+                                type="button"
+                                class="text-button"
+                                data-command="edit-pc"
+                                data-id="<%= pc.id() %>"
+                                data-laboratory="<%= pc.laboratoryId() %>"
+                                data-name="<%= Html.escape(pc.name()) %>"
+                                data-ip="<%= Html.escape(pc.ip()) %>"
+                            >
+                                Editar
+                            </button>
+                            <form method="post" data-confirm="¿Eliminar este equipo?">
+                                <input type="hidden" name="page" value="<%= activePage %>" />
+                                <input type="hidden" name="csrf" value="<%= csrf %>" />
+                                <input type="hidden" name="action" value="delete-computer" />
+                                <input type="hidden" name="id" value="<%= pc.id() %>" />
+                                <button class="danger text-button">Eliminar</button>
+                            </form>
+                            <form
+                                method="post"
+                                data-confirm="¿Enviar una orden de apagado a este equipo?"
+                            >
+                                <input type="hidden" name="page" value="<%= activePage %>" />
+                                <input type="hidden" name="csrf" value="<%= csrf %>" />
+                                <input type="hidden" name="action" value="shutdown" />
+                                <input type="hidden" name="id" value="<%= pc.id() %>" />
+                                <button class="danger text-button">Apagar</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+
+    <dialog id="pcs-editor" class="record-modal" aria-labelledby="pcs-editor-title">
+        <header class="modal-header">
+            <h2 id="pcs-editor-title">Agregar computadora</h2>
+            <button type="button" class="secondary" data-command="close">Cerrar</button>
+        </header>
+        <form method="post" class="editor">
+            <input type="hidden" name="page" value="<%= activePage %>" />
+            <input type="hidden" name="csrf" value="<%= csrf %>" />
+            <input type="hidden" name="action" value="save-computer" />
+            <input type="hidden" name="id" id="pc-id" value="0" />
+            <label>
+                Nombre
+                <input id="pc-name" name="name" maxlength="100" required placeholder="PC-01" />
+            </label>
+            <label>
+                IPv4 privada (registro sin control remoto)
+                <input id="pc-ip" name="ip" required placeholder="192.168.1.10" />
+            </label>
+            <label>
+                Laboratorio
+                <select id="pc-lab" name="laboratoryId" required>
+                    <option value="">Seleccionar</option>
+                    <% for (Laboratory lab : labs) { %>
+                    <option value="<%= lab.id() %>"><%= Html.escape(lab.name()) %></option>
+                    <% } %>
+                </select>
+            </label>
+            <div class="modal-actions">
+                <button type="button" class="secondary" data-command="close">Cancelar</button>
+                <button type="submit">Guardar computadora</button>
+            </div>
+        </form>
+    </dialog>
+</section>

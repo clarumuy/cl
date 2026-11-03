@@ -1,0 +1,131 @@
+@media (max-width: 1100px) {
+    .app-layout {
+        grid-template-columns: 185px minmax(0, 1fr);
+    }
+    .content {
+        padding: 30px 24px;
+    }
+    .topbar {
+        padding-inline: 24px;
+    }
+    .stat {
+        padding-inline: 14px;
+    }
+    .section-title {
+        align-items: flex-start;
+    }
+}
+@media (max-width: 760px) {
+    .app-layout {
+        display: block;
+    }
+    .sidebar {
+        position: relative;
+        height: auto;
+        padding: 16px;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+    }
+    .brand {
+        padding: 0 0 16px;
+    }
+    .side-label,
+    .sidebar-bottom,
+    .nav-icon {
+        display: none;
+    }
+    .side-nav {
+        display: flex;
+        overflow-x: auto;
+        gap: 2px;
+    }
+    .side-nav a {
+        flex-shrink: 0;
+        padding: 8px;
+        min-height: 38px;
+    }
+    .topbar {
+        padding: 10px 18px;
+    }
+    .topbar > span {
+        font-size: 11px;
+    }
+    .topbar strong,
+    .topbar-separator {
+        display: none;
+    }
+    .content {
+        padding: 28px 18px;
+    }
+    .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 22px 0;
+    }
+    .stat:nth-child(odd) {
+        padding-left: 0;
+    }
+    .stat:nth-child(even) {
+        border-right: 0;
+    }
+    .section-title {
+        flex-direction: column;
+        gap: 8px;
+    }
+    table {
+        min-width: 620px;
+    }
+    #users table {
+        min-width: 340px;
+    }
+    .editor {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+    .table-toolbar {
+        align-items: start;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .table-toolbar p {
+        margin: 0;
+    }
+    .login-page {
+        display: block;
+    }
+    .login-aside {
+        min-height: auto;
+        padding: 24px;
+    }
+    .login-aside h2 {
+        margin: 15px 0 0;
+        font-size: 32px;
+    }
+    .login-aside p,
+    .login-aside > small,
+    .login-aside span {
+        display: none;
+    }
+    .login {
+        padding: 38px 0;
+    }
+}
+@media (prefers-reduced-motion: no-preference) {
+    html {
+        scroll-behavior: smooth;
+    }
+}
+
+::selection {
+    background: #d3e4f3;
+    color: #284966;
+}
+input {
+    caret-color: var(--accent);
+}
+td {
+    font-variant-numeric: tabular-nums;
+}
+a {
+    text-underline-offset: 3px;
+}
+

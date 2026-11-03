@@ -1,0 +1,67 @@
+.login-page {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 45% 55%;
+    background: #f7fafd;
+}
+.login-aside {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 100vh;
+    padding: 48px 12%;
+    background: #e2edf6;
+    border-right: 1px solid #ccdeec;
+}
+.login-aside-mark {
+    width: 112px;
+    height: 112px;
+}
+.login-aside span,
+.login-aside > small {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: #54708a;
+}
+.login-aside h2 {
+    margin: 20px 0;
+    max-width: 400px;
+    font-size: clamp(36px, 4vw, 62px);
+    line-height: 1.07;
+    letter-spacing: -0.035em;
+    font-weight: 550;
+}
+.login-aside p {
+    max-width: 300px;
+    color: #506d87;
+    font-size: 14px;
+    line-height: 1.7;
+}
+.login {
+    width: min(390px, calc(100% - 48px));
+    margin: auto;
+    padding: 48px 0;
+}
+.login h1 {
+    margin: 12px 0;
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -0.035em;
+}
+.login > p {
+    color: var(--muted);
+    margin-bottom: 32px;
+    font-size: 13px;
+}
+.login form {
+    display: grid;
+    gap: 22px;
+}
+.login input {
+    min-height: 46px;
+}
+.login button {
+    margin-top: 6px;
+    min-height: 46px;
+}

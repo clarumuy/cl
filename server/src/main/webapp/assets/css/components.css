@@ -1,0 +1,91 @@
+.side-nav a[aria-current="page"] {
+    background: #d6e6f3;
+    color: #284966;
+    font-weight: 650;
+    box-shadow: inset 2px 0 #3c668e;
+}
+
+body.modal-open {
+    overflow: hidden;
+}
+.record-modal {
+    width: min(520px, calc(100% - 32px));
+    max-height: calc(100dvh - 32px);
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: #fff;
+    color: var(--ink);
+    overflow-y: auto;
+    box-shadow: 0 20px 70px #1b355330;
+}
+.record-modal::backdrop {
+    background: #1b304869;
+}
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--line);
+}
+.modal-header h2 {
+    margin: 0;
+}
+.modal-header button {
+    min-height: 36px;
+    padding: 6px 10px;
+}
+.record-modal .editor {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 24px;
+}
+.record-modal label {
+    min-width: 0;
+}
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-top: 8px;
+}
+@media (max-width: 760px) {
+    .section-title {
+        flex-direction: row;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    .modal-header,
+    .record-modal .editor {
+        padding: 18px;
+    }
+}
+
+.installation-guide {
+    padding: 22px;
+    margin-bottom: 24px;
+    border: 1px solid var(--line);
+    background: #fff;
+}
+.installation-guide label {
+    margin: 18px 0;
+}
+.installation-guide p {
+    color: var(--muted);
+    font-size: 12px;
+}
+.installation-guide textarea {
+    width: 100%;
+    resize: vertical;
+    padding: 12px;
+    border: 1px solid #b4c5d5;
+    background: #f5f8fb;
+    color: var(--ink);
+    font:
+        11px/1.6 ui-monospace,
+        monospace;
+}

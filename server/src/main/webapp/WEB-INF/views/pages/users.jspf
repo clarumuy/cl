@@ -1,0 +1,94 @@
+<%@ page pageEncoding="UTF-8" %>
+<section id="users" class="panel">
+    <div class="section-title">
+        <h2>
+            Usuarios
+            <span><%= users.size() %></span>
+        </h2>
+        <button
+            type="button"
+            aria-haspopup="dialog"
+            aria-controls="users-editor"
+            data-command="create"
+            data-section="users"
+            data-title="Agregar usuario"
+            data-field="user-name"
+        >
+            Agregar usuario
+        </button>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Usuario</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (users.isEmpty()) { %>
+                <tr>
+                    <td colspan="2" class="table-empty">No hay usuarios registrados.</td>
+                </tr>
+                <% } %>
+                <% for (User user : users) { %>
+                <tr>
+                    <td><%= Html.escape(user.username()) %></td>
+                    <td>
+                        <div class="actions">
+                            <button
+                                type="button"
+                                class="text-button"
+                                data-command="edit-user"
+                                data-id="<%= user.id() %>"
+                                data-name="<%= Html.escape(user.username()) %>"
+                            >
+                                Editar
+                            </button>
+                            <form method="post" data-confirm="¿Eliminar este usuario?">
+                                <input type="hidden" name="page" value="<%= activePage %>" />
+                                <input type="hidden" name="csrf" value="<%= csrf %>" />
+                                <input type="hidden" name="action" value="delete-user" />
+                                <input type="hidden" name="id" value="<%= user.id() %>" />
+                                <button class="danger text-button">Eliminar</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+
+    <dialog id="users-editor" class="record-modal" aria-labelledby="users-editor-title">
+        <header class="modal-header">
+            <h2 id="users-editor-title">Agregar usuario</h2>
+            <button type="button" class="secondary" data-command="close">Cerrar</button>
+        </header>
+        <form method="post" class="editor">
+            <input type="hidden" name="page" value="<%= activePage %>" />
+            <input type="hidden" name="csrf" value="<%= csrf %>" />
+            <input type="hidden" name="action" value="save-user" />
+            <input type="hidden" name="id" id="user-id" value="0" />
+            <label>
+                Usuario
+                <input id="user-name" name="username" maxlength="60" required />
+            </label>
+            <label>
+                Contraseña
+                <small>(dejala vacía al editar para conservarla)</small>
+                <input
+                    id="user-password"
+                    name="password"
+                    type="password"
+                    autocomplete="new-password"
+                    minlength="12"
+                />
+            </label>
+            <div class="modal-actions">
+                <button type="button" class="secondary" data-command="close">Cancelar</button>
+                <button type="submit">Guardar usuario</button>
+            </div>
+        </form>
+    </dialog>
+</section>

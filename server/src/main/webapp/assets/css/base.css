@@ -1,0 +1,250 @@
+:root {
+    font-family: "Segoe UI", Arial, sans-serif;
+    color: #263747;
+    background: #f5f8fb;
+    font-size: 14px;
+    line-height: 1.5;
+    color-scheme: light;
+    --ink: #263747;
+    --muted: #5d7082;
+    --line: #d6e0e9;
+    --accent: #3c668e;
+}
+* {
+    box-sizing: border-box;
+}
+body {
+    margin: 0;
+}
+h1,
+h2,
+p {
+    margin-top: 0;
+}
+a {
+    color: inherit;
+}
+button,
+input,
+select {
+    font: inherit;
+}
+button,
+summary {
+    cursor: pointer;
+}
+button,
+input,
+select {
+    border-radius: 2px;
+}
+button {
+    min-height: 40px;
+    padding: 9px 15px;
+    border: 1px solid #416b93;
+    background: #416b93;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+}
+button:hover {
+    background: #315575;
+}
+input:not([type="hidden"]),
+select {
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
+    padding: 9px 11px;
+    border: 1px solid #b4c5d5;
+    background: #fff;
+    color: var(--ink);
+}
+input:disabled {
+    background: #edf2f7;
+    color: var(--muted);
+}
+label {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    font-size: 12px;
+    font-weight: 600;
+}
+label small {
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 400;
+}
+:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+.skip-link {
+    position: fixed;
+    z-index: 10;
+    left: 12px;
+    top: -70px;
+    padding: 12px;
+    background: #fff;
+}
+.skip-link:focus {
+    top: 12px;
+}
+.app-layout {
+    display: grid;
+    grid-template-columns: 210px minmax(0, 1fr);
+    min-height: 100vh;
+}
+.sidebar {
+    position: sticky;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding: 30px 16px 22px;
+    border-right: 1px solid var(--line);
+    background: #eaf1f7;
+}
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 7px 44px;
+    font-size: 19px;
+    font-weight: 750;
+    letter-spacing: -0.04em;
+}
+.brand-mark,
+.login-aside-mark {
+    display: block;
+    flex-shrink: 0;
+    width: 52px;
+    height: 52px;
+    object-fit: contain;
+}
+.brand small {
+    display: block;
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0;
+}
+.side-label {
+    padding: 0 10px 12px;
+    color: var(--muted);
+    font-size: 9px;
+    font-weight: 650;
+    letter-spacing: 0.12em;
+}
+.side-nav {
+    display: grid;
+    gap: 4px;
+}
+.side-nav a {
+    display: flex;
+    align-items: center;
+    min-height: 43px;
+    gap: 12px;
+    padding: 10px;
+    text-decoration: none;
+    font-size: 12px;
+}
+.side-nav a:hover,
+.side-nav a:focus-visible {
+    background: #dce8f2;
+}
+.nav-icon {
+    color: #73899c;
+    font:
+        10px ui-monospace,
+        monospace;
+}
+.nav-count {
+    margin-left: auto;
+    padding: 1px 5px;
+    background: #d6e5f2;
+    color: #355e83;
+    font-size: 11px;
+}
+.sidebar-bottom {
+    margin-top: auto;
+    padding: 17px 8px 0;
+    border-top: 1px solid #cbd9e5;
+    color: #50687b;
+    font-size: 12px;
+    line-height: 1.8;
+}
+.sidebar-bottom small {
+    color: var(--muted);
+    font-size: 10px;
+}
+.sidebar-dot {
+    display: none;
+}
+.workspace {
+    min-width: 0;
+}
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    min-height: 65px;
+    padding: 12px 40px;
+    border-bottom: 1px solid var(--line);
+    background: #fff;
+    color: var(--muted);
+    font-size: 12px;
+}
+.topbar strong {
+    color: var(--ink);
+    font-weight: 500;
+}
+.topbar-separator {
+    margin: 0 10px;
+    color: #91a5b7;
+}
+.topbar form {
+    margin: 0;
+    flex-shrink: 0;
+}
+.secondary {
+    border-color: #b5c6d6;
+    background: transparent;
+    color: #3d5c78;
+}
+.secondary:hover {
+    background: #e6eef6;
+}
+.logout {
+    min-height: 34px;
+    padding: 6px 11px;
+    font-weight: 500;
+}
+.content {
+    width: min(100%, 1360px);
+    margin: auto;
+    padding: 42px 40px 24px;
+}
+.intro {
+    margin-bottom: 30px;
+}
+.eyebrow {
+    font-size: 10px;
+    font-weight: 650;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+}
+.intro h1 {
+    margin: 8px 0 9px;
+    font-size: clamp(30px, 3vw, 42px);
+    line-height: 1.15;
+    font-weight: 650;
+    letter-spacing: -0.035em;
+}
+.intro p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+}

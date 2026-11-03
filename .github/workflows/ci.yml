@@ -50,7 +50,9 @@ jobs:
           trap 'docker compose down -v --remove-orphans; rm -f .env' EXIT
           docker compose config --quiet
           docker compose up -d --wait db
-          docker compose exec -T db sh /opt/control/check-database.sh
+          # Una base nueva debe conectar sin intentar reparar credenciales.
+          initial_check=$(docker compose exec -T db sh /opt/control/check-database.sh)
+          test -z "$initial_check"
           # Simular una contraseña persistida distinta y verificar su reparación.
           docker compose exec -T db sh -c 'MYSQL_PWD="$MARIADB_ROOT_PASSWORD" mariadb -u root' <<'SQL'
           SET PASSWORD FOR 'control'@'%' = PASSWORD('clave-anterior-de-prueba');

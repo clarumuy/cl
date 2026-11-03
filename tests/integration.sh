@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Prueba HTTP/JDBC real. SOLO para un entorno Docker de prueba desechable.
 set -Eeuo pipefail
+trap 'printf "Falló la prueba de integración en %s:%s (código %s).\n" "${BASH_SOURCE[0]}" "$LINENO" "$?" >&2' ERR
 cd "$(dirname "$0")/.."
 command -v docker >/dev/null
 command -v curl >/dev/null
@@ -27,7 +28,10 @@ wait_for_server() {
     return 1
 }
 wait_for_server
-# Bootstrap + sesión y CSRF real.
+# Bootstrap + sesión y CSRF real. Se renueva tras reiniciar Tomcat.
+login() {
+# Descartar cookies anteriores permite iniciar sesión aunque Tomcat las conserve.
+: > "$jar/cookies"
 request --cookie-jar "$jar/cookies" "$origin/app" -o "$jar/login"
 csrf=$(grep -oE 'name="csrf" value="[a-f0-9-]{36}"' "$jar/login" | head -1 | cut -d '"' -f4)
 [[ -n "$csrf" ]]
@@ -39,6 +43,8 @@ request --cookie "$jar/cookies" "$origin/app?page=labs" -o "$jar/panel"
 grep -q 'Agregar laboratorio' "$jar/panel"
 csrf=$(grep -oE 'name="csrf" value="[a-f0-9-]{36}"' "$jar/panel" | head -1 | cut -d '"' -f4)
 [[ -n "$csrf" ]]
+}
+login
 # Una operación sin token no puede cambiar nada.
 status=$(request --cookie "$jar/cookies" --data action=save-lab -o /dev/null -w '%{http_code}' "$origin/app")
 [[ "$status" == 403 ]]
@@ -182,6 +188,8 @@ wait_for_server
 [[ "$(query "SELECT COUNT(*) FROM laboratories WHERE id=$lab")" == 1 ]]
 [[ "$(query "SELECT revoked FROM agent_nodes WHERE id='$id'")" == 1 ]]
 # Borrado de laboratorio: la FK impide borrar una sala con PCs, luego permite hacerlo.
+# Los datos persisten en MariaDB; la sesión HTTP anterior puede haber caducado.
+login
 status=$(request --cookie "$jar/cookies" --data-urlencode action=delete-lab \
     --data-urlencode "id=$lab" --data-urlencode "csrf=$csrf" \
     -o /dev/null -w '%{http_code}' "$origin/app")
